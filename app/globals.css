@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f4f4f5;
+  --foreground: #18181b;
+  --muted: #71717a;
+  --border: #e4e4e7;
+  --accent: #b91c1c;
+  --accent-hover: #dc2626;
+  --nav-bg: #18181b;
+  --nav-text: #e4e4e7;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html {
+  /* Reserve space for scrollbar so layout doesn't shift when navigating between short/long pages */
+  scrollbar-gutter: stable;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+[contenteditable][data-placeholder]:empty::before {
+  content: attr(data-placeholder);
+  color: var(--muted);
+}
+
+/* Mobile: minimum 44px touch targets for primary interactive elements */
+@media (pointer: coarse) {
+  header a[href],
+  header button {
+    min-height: 44px;
+    min-width: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem 0.75rem;
+  }
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Hero logo animation */
+@keyframes logoFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes logoGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 10px rgba(220, 38, 38, 0.3));
+  }
+  50% {
+    filter: drop-shadow(0 0 20px rgba(220, 38, 38, 0.5));
+  }
+}
+
+.logo-hero {
+  animation: logoFadeIn 0.8s ease-out, logoGlow 3s ease-in-out infinite;
+}
+
+/* Discourage copying: disable text selection and image drag (optional) */
+.copy-protect {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.copy-protect img {
+  -webkit-user-drag: none;
+  user-drag: none;
+}

@@ -1,0 +1,129 @@
+// AJHL Event Check-in - Prisma Schema
+// PostgreSQL (Supabase, Neon, etc.) for local and production
+
+generator client {
+  provider      = "prisma-client-js"
+  output        = "../generated/prisma"
+  binaryTargets = ["native", "rhel-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String   @id @default(cuid())
+  username           String   @unique
+  passwordHash       String
+  email              String   @unique
+  firstName          String
+  lastName           String
+  phone              String?
+  nickname           String?
+  jerseyNumber           String?  // preferred jersey number
+  secondaryJerseyNumber  String?  // secondary jersey number
+  thirdJerseyPreference  String?  // third jersey preference (e.g. "any dark")
+  position               String?  // e.g. "Forward", "Defense", "Goalie"
+  bio                    String?  // short bio for profile
+  usaHockey              String?  // USA Hockey registration number
+  profilePictureUrl      String?  // URL to profile picture (e.g. "/uploads/profiles/abc.jpg")
+  showContactToTeam  Boolean  @default(true) // show email/phone to captains/teammates
+  isAdmin            Boolean  @default(false)
+  passwordResetCode  String?
+  passwordResetExpires DateTime?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  registrations EventRegistration[]
+  emailPrefs    EmailPreferences?
+  eventCaptains EventCaptain[]
+}
+
+model EmailPreferences {
+  id                    String   @id @default(cuid())
+  userId                String   @unique
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reminderEvents        Boolean  @default(true)
+  reminderWaitlistMoved Boolean  @default(true)
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
+
+model Event {
+  id             String    @id @default(cuid())
+  name           String    // event name/title
+  league         String    // A | B | C | D
+  type           String    // "league" | "extra"
+  startTime      DateTime
+  location       String
+  venueKey       String?   // predefined venue key from lib/rinks (for directions)
+  rink           String?   // ice sheet name (admin types whatever, e.g. "Rink 1")
+  description    String?
+  hasFee         Boolean   @default(false)
+  costAmount     Float?
+  maxPlayers     Int?
+  approvalNeeded Boolean   @default(false) // substitutes: sign up as "requested", captain/admin approves
+  cancelledAt    DateTime? // when set, event is cancelled (optionally notify players)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  registrations EventRegistration[]
+  captains      EventCaptain[]
+}
+
+model EventCaptain {
+  id       String @id @default(cuid())
+  eventId  String
+  event    Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([eventId, userId])
+  @@index([eventId])
+}
+
+model EventRegistration {
+  id               String   @id @default(cuid())
+  eventId          String
+  event            Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status           String   // "going" | "waitlist" | "requested" | "removed"
+  position         Int      @default(0) // waitlist order
+  line             Int?     // assigned line number (1-5)
+  assignedPosition String?  // assigned position: Defense, Forward, Goalie, LW, RW, Center, LD, RD
+  joinedAt         DateTime @default(now())
+  removedAt        DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([eventId, userId])
+  @@index([eventId])
+  @@index([userId])
+}
+
+model NewsPost {
+  id        String   @id @default(cuid())
+  title     String   @default("") // post title (required when creating/editing)
+  content   String   // rich text content
+  images    String?  // JSON array of paths e.g. ["/uploads/news/abc.jpg"]
+  position  Int      @default(0) // higher = higher in feed (newest first when sorted desc)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?  // who performed the action (null for system)
+  action     String   // e.g. "event.create", "event.update", "event.cancel", "registration.approve", "registration.remove"
+  entityType String   // "event" | "registration" | "user" etc.
+  entityId   String?
+  details    String?  // JSON or short description
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([createdAt])
+}

@@ -1,0 +1,44 @@
+# Only upload what's needed for the deployed site and function. Everything below is excluded.
+
+# Dependencies (not uploaded as static assets; plugin packages what the function needs)
+node_modules
+
+# Next.js build cache only (keep .next/static and .next/server; drop cache to save size)
+.next/cache
+.next/cache/**
+
+# Env and secrets (never upload)
+.env
+.env.*
+.env.local
+.env.*.local
+
+# Local dev and tooling
+*.log
+.DS_Store
+.idea
+.vscode
+.cursor
+*.tsbuildinfo
+next-env.d.ts
+deno.lock
+
+# Database and uploads (not used in serverless; use Supabase + cloud storage in prod)
+prisma/*.db
+prisma/*.db-journal
+prisma/dev.db
+public/uploads
+public/uploads/**
+
+# Docs and scripts (not needed at runtime)
+TEST_ACCOUNTS.md
+DEPLOYMENT.md
+DEPLOY_VIA_GIT.md
+QUICK_DEPLOY.md
+POSTGRES_SETUP.md
+NETLIFY_SETUP.md
+README.md
+scripts/
+
+# Netlify local (CLI state)
+.netlify
