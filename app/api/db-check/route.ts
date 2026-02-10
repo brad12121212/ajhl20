@@ -65,5 +65,8 @@ export async function GET() {
     };
   }
 
-  return NextResponse.json(result, { status: result.ok ? 200 : 500 });
+  return NextResponse.json(result, {
+    status: result.ok ? 200 : 500,
+    headers: { "Cache-Control": "no-store, no-cache, must-revalidate" },
+  });
 }
