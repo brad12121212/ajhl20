@@ -53,6 +53,7 @@ const RESOURCES_LINKS: { href: string; label: string; external?: boolean }[] = [
 export function NavLinks({ session }: Props) {
   const pathname = usePathname();
   const [resourcesOpen, setResourcesOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const isAdminActive = pathname.startsWith("/dashboard/admin");
   const isResourcesActive = pathname === "/rules" || pathname === "/contact" || pathname.startsWith("/rules/") || pathname.startsWith("/contact/");
@@ -67,7 +68,11 @@ export function NavLinks({ session }: Props) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  return (
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
+  const desktopLinks = (
     <>
       <NavLink href="/" exact>News</NavLink>
       <NavLink href="/schedule">Events</NavLink>
@@ -135,6 +140,91 @@ export function NavLinks({ session }: Props) {
           </Link>
         </>
       )}
+    </>
+  );
+
+  const mobileLinks = (
+    <>
+      <NavLink href="/" exact>News</NavLink>
+      <NavLink href="/schedule">Events</NavLink>
+      {RESOURCES_LINKS.map(({ href, label, external }) => (
+        <NavLink key={href} href={href} exact={!external} external={!!external} variant="dropdown">
+          {label}
+        </NavLink>
+      ))}
+      {session ? (
+        <>
+          <NavLink href="/dashboard" exact>My schedule</NavLink>
+          <NavLink href="/dashboard/profile">Profile</NavLink>
+          {session.isAdmin && (
+            <Link
+              href="/dashboard/admin"
+              className={`rounded border-2 border-transparent px-2 py-1.5 text-xs font-medium uppercase tracking-wide ${
+                isAdminActive
+                  ? "border-red-500 bg-red-600 text-white"
+                  : "border-transparent bg-red-600 text-white hover:bg-red-500"
+              }`}
+            >
+              Admin
+            </Link>
+          )}
+          <form action="/api/auth/logout" method="POST" className="inline-block">
+            <button
+              type="submit"
+              className="rounded border-2 border-transparent px-2 py-1.5 text-xs font-medium uppercase tracking-wide text-zinc-400 hover:text-white"
+            >
+              Log out
+            </button>
+          </form>
+        </>
+      ) : (
+        <>
+          <NavLink href="/login">Log in</NavLink>
+          <Link
+            href="/register"
+            className="rounded border-2 border-transparent px-2 py-1.5 text-xs font-medium uppercase tracking-wide text-white bg-red-600 hover:bg-red-500"
+          >
+            Sign up
+          </Link>
+        </>
+      )}
+    </>
+  );
+
+  return (
+    <>
+      <nav className="hidden items-center gap-1 sm:flex sm:gap-2">{desktopLinks}</nav>
+      <div className="relative flex sm:hidden">
+        <button
+          type="button"
+          onClick={() => setMobileOpen((o) => !o)}
+          className="rounded p-2 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+          aria-label={mobileOpen ? "Close menu" : "Open menu"}
+          aria-expanded={mobileOpen}
+        >
+          {mobileOpen ? (
+            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          ) : (
+            <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          )}
+        </button>
+        {mobileOpen && (
+          <>
+            <div
+              className="fixed inset-0 z-40 bg-black/50"
+              aria-hidden
+              onClick={() => setMobileOpen(false)}
+            />
+            <div className="fixed right-0 top-0 z-50 flex h-full w-full max-w-[280px] flex-col border-l border-zinc-700 bg-zinc-900 py-6 pl-6 pr-4 shadow-xl">
+              <div className="flex flex-col gap-2">{mobileLinks}</div>
+            </div>
+          </>
+        )}
+      </div>
     </>
   );
 }

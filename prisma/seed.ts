@@ -19,12 +19,16 @@ async function main() {
   const adminEmail = "ajhl20@gmail.com";
   const oldAdmin = await prisma.user.findFirst({ where: { username: "Admin123" } });
   if (oldAdmin) {
-    await prisma.user.update({ where: { id: oldAdmin.id }, data: { username: "admin123" } });
+    await prisma.user.update({ where: { id: oldAdmin.id }, data: { username: adminEmail } });
+  }
+  const adminWithOldUsername = await prisma.user.findFirst({ where: { username: "admin123" } });
+  if (adminWithOldUsername) {
+    await prisma.user.update({ where: { id: adminWithOldUsername.id }, data: { username: adminEmail } });
   }
   await prisma.user.upsert({
     where: { email: adminEmail },
     create: {
-      username: "admin123",
+      username: adminEmail,
       passwordHash: hash,
       email: adminEmail,
       firstName: "Admin",
@@ -32,9 +36,9 @@ async function main() {
       phone: "+15550000000",
       isAdmin: true,
     },
-    update: { passwordHash: hash, isAdmin: true, username: "admin123" },
+    update: { passwordHash: hash, isAdmin: true, username: adminEmail },
   });
-  console.log("Seeded default admin: admin123 / Password123 (login with username or email)");
+  console.log("Seeded default admin: ajhl20@gmail.com / Password123 (login with email)");
 
   const profilesDir = path.join(process.cwd(), "public", "uploads", "profiles");
   if (!fs.existsSync(profilesDir)) {

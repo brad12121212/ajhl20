@@ -2,6 +2,7 @@
 
 Email | Password | Note
 ------|----------|-------
+ajhl20@gmail.com | Password123 | **Admin**
 tester1@example.com | Test1234 | 
 tester2@example.com | Test1234 | 
 tester3@example.com | Test1234 | **Goalie**
