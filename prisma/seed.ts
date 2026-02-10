@@ -16,24 +16,25 @@ const TEST_USERS = [
 
 async function main() {
   const hash = await bcrypt.hash("Password123", 10);
+  const adminEmail = "ajhl20@gmail.com";
   const oldAdmin = await prisma.user.findFirst({ where: { username: "Admin123" } });
   if (oldAdmin) {
     await prisma.user.update({ where: { id: oldAdmin.id }, data: { username: "admin123" } });
   }
   await prisma.user.upsert({
-    where: { username: "admin123" },
+    where: { email: adminEmail },
     create: {
       username: "admin123",
       passwordHash: hash,
-      email: "ajhl20@gmail.com",
+      email: adminEmail,
       firstName: "Admin",
       lastName: "User",
       phone: "+15550000000",
       isAdmin: true,
     },
-    update: { passwordHash: hash, isAdmin: true },
+    update: { passwordHash: hash, isAdmin: true, username: "admin123" },
   });
-  console.log("Seeded default admin: admin123 / Password123 (login is case-insensitive: Admin123 works too)");
+  console.log("Seeded default admin: admin123 / Password123 (login with username or email)");
 
   const profilesDir = path.join(process.cwd(), "public", "uploads", "profiles");
   if (!fs.existsSync(profilesDir)) {
