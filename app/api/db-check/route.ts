@@ -43,8 +43,8 @@ export async function GET() {
     try {
       const supabase = getSupabase();
       const [profilesRes, newsRes] = await Promise.all([
-        supabase.storage.from("profiles").list("", { limit: 1),
-        supabase.storage.from("news").list("", { limit: 1),
+        supabase.storage.from("profiles").list("", { limit: 1 }),
+        supabase.storage.from("news").list("", { limit: 1 }),
       ]);
       result.storage.profiles = profilesRes.error ? `error: ${profilesRes.error.message}` : "ok";
       result.storage.news = newsRes.error ? `error: ${newsRes.error.message}` : "ok";
