@@ -1,7 +1,11 @@
 #!/usr/bin/env sh
-# Use DIRECT_DATABASE_URL for migrations if set (e.g. Netlify); otherwise DATABASE_URL.
-# Supabase pooler (port 6543) can hang on migrate; use direct URL (port 5432) in Netlify.
-if [ -n "$DIRECT_DATABASE_URL" ]; then
-  export DATABASE_URL="$DIRECT_DATABASE_URL"
+# Run migrations. When using Supabase pooler (port 6543), Prisma needs pgbouncer=true
+# or migrations can hang. We append it here for the migrate step only (runtime unchanged).
+if [ -n "$DATABASE_URL" ]; then
+  case "$DATABASE_URL" in
+    *pgbouncer=true*) ;;
+    *\?*) export DATABASE_URL="${DATABASE_URL}&pgbouncer=true" ;;
+    *) export DATABASE_URL="${DATABASE_URL}?pgbouncer=true" ;;
+  esac
 fi
 npx prisma migrate deploy
