@@ -4,16 +4,40 @@ import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { HomeClient } from "./HomeClient";
 
+function safeParseImages(images: string | null): string[] {
+  if (!images) return [];
+  try {
+    const parsed = JSON.parse(images);
+    return Array.isArray(parsed) ? (parsed as string[]) : [];
+  } catch {
+    return [];
+  }
+}
+
 export default async function HomePage() {
   const session = await getSession();
-  const posts = await prisma.newsPost.findMany({
-    orderBy: [{ position: "desc" }, { createdAt: "desc" }],
-  });
-  const postsWithImages = posts.map((p) => ({
-    ...p,
-    images: p.images ? (JSON.parse(p.images) as string[]) : [],
-    createdAt: p.createdAt.toISOString(),
-  }));
+  let postsWithImages: Array<{
+    id: string;
+    title: string;
+    content: string;
+    images: string[];
+    createdAt: string;
+    updatedAt: Date;
+    position: number;
+  }> = [];
+
+  try {
+    const posts = await prisma.newsPost.findMany({
+      orderBy: [{ position: "desc" }, { createdAt: "desc" }],
+    });
+    postsWithImages = posts.map((p) => ({
+      ...p,
+      images: safeParseImages(p.images),
+      createdAt: p.createdAt.toISOString(),
+    }));
+  } catch (error) {
+    console.error("Home page failed to load news posts:", error);
+  }
 
   return (
     <div className="min-h-screen">
