@@ -219,8 +219,8 @@ export function NavLinks({ session }: Props) {
               aria-hidden
               onClick={() => setMobileOpen(false)}
             />
-            <div className="fixed right-0 top-0 z-50 flex h-full w-full max-w-[280px] flex-col border-l border-zinc-700 bg-zinc-900 py-6 pl-6 pr-4 shadow-xl">
-              <div className="flex flex-col gap-2">{mobileLinks}</div>
+            <div className="fixed right-0 top-0 z-50 flex h-full w-[min(100vw,280px)] max-w-[280px] flex-col border-l border-zinc-700 bg-zinc-900 py-6 pl-5 pr-4 shadow-xl [padding-left:max(1.25rem,env(safe-area-inset-left))]">
+              <div className="flex flex-col gap-1 overflow-y-auto">{mobileLinks}</div>
             </div>
           </>
         )}
